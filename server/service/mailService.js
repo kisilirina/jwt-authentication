@@ -11,7 +11,6 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendActivationLinkToEmail = async (email, link) => {
-
   const mailOptions = {
     from: process.env.SMTP_USER,
     to: email,
@@ -22,8 +21,11 @@ const sendActivationLinkToEmail = async (email, link) => {
           <h1>Для активации перейдите по ссылке</h1>
           <a href="${link}">${link}</a>
         </div>`,
-  }
-  await transporter.sendMail(mailOptions, (err, res) => err ? console.log(err) : console.log('Email sent'));
+  };
+  await transporter.sendMail(mailOptions, (err, res) => {
+    if (err) console.log(err);
+    else console.log('Email sent');
+  });
 };
 
 module.exports = {

@@ -1,23 +1,27 @@
-// const { Router } = require("express");
-// const router = new Router();
-const router = new require("express").Router();
+const { Router } = require('express');
+
+const router = new Router();
+
+const { body } = require('express-validator');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 const {
   userSignup,
   userSignin,
   userSignout,
-  refreshToken,
+  refresh,
   activateAccount,
-  getUsers
+  getUsers,
 } = require('../controllers/userController');
 
-
-router.post('/signup', userSignup);
+router.post('/signup',
+  body('email').isEmail(),
+  body('password').isLength({ min: 3, max: 32 }),
+  userSignup);
 router.post('/signin', userSignin);
 router.post('/signout', userSignout);
 router.get('/activate/:link', activateAccount);
-router.get('/refresh', refreshToken);
-router.get('/users', getUsers);
+router.get('/refresh', refresh);
+router.get('/users', authMiddleware, getUsers);
 
 module.exports = router;
-

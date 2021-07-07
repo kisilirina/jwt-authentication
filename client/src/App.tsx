@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { FC, useContext, useEffect, useState } from 'react';
+import { Context } from './index';
+import LoginForm from './components/LoginForm';
+import { observer } from 'mobx-react-lite';
+import { fetchUsers } from './services/userService';
+import { IUser } from './models/IUser';
 
-function App() {
+const App: FC = () => {
+  const { store } = useContext(Context);
+  const [users, setUsers] = useState<IUser[]>([]);
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      store.checkAuth();
+    }
+  }, [])
+
+  const getUsers = async () => {
+    try {
+      const response = await fetchUsers();
+      console.log('getUsers', response.data);
+      setUsers(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  if (store.isLoading) {
+    return (<div> Загрузка....</div>);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    store.isAuth ?
+      <div>
+        <h1>{store.isAuth ? `Пользователь авторизован ${store.user.email}` : 'Авторизуйтесь'}</h1>
+        <h1>{store.user.isActivated ? 'Аккаунт активирован' : 'Активируйте ссылку на почте!'}</h1>
+        <button onClick={() => store.logout()}>Sign out</button>
+        <div>
+          <button
+            onClick={getUsers}
+          >
+            Получить пользователей
+          </button>
+        </div>
+        {
+        users.map(user => <div key={user.email}>{user.email}</div>)
+        }
+      </div>
+      : <LoginForm />
   );
 }
 
-export default App;
+export default observer(App);

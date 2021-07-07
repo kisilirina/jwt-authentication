@@ -13,6 +13,5 @@ module.exports = {
   },
   rules: {
     'no-console': 0,
-    'quotes': ["error", "never"],
   },
 };
